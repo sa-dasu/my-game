@@ -1,0 +1,872 @@
+<title>Driftline UI Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+  /* Single dark look on purpose: it mirrors the in-game UI, which has no light theme. */
+  :root {
+    color-scheme: dark;
+    --page: #03060C;
+    --bg: #060A13;
+    --scrim: rgba(4,7,14,.74);
+    --glass: rgba(10,18,32,.62);
+    --surface: #0D1422;
+    --raised: #152036;
+    --sunken: #04070D;
+    --border: #22314D;
+    --border-strong: #36507A;
+    --text: #E6EDF7;
+    --muted: #8C9BB5;
+    --disabled: #4B5A74;
+    --on-accent: #1A1103;
+    --accent: #FFB547;
+    --accent-hover: #FFCB7A;
+    --accent-pressed: #D18E2A;
+    --accent-soft: rgba(255,181,71,.14);
+    --blue: #4DA3FF; --blue-soft: rgba(77,163,255,.16);
+    --red: #FF5A5F; --red-soft: rgba(255,90,95,.16);
+    --shield: #5CD6F0; --shield-back: #0F2E3A;
+    --hull: #E6EDF7; --hull-back: #26303F;
+    --energy: #9BE36A; --energy-back: #1E3319;
+    --success: #5FD68A; --danger: #FF6B5A;
+    --display: "Chakra Petch", "Eurostile", "Segoe UI", sans-serif;
+    --body: "Barlow", "Noto Sans KR", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--page); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.5; padding-inline: 16px; padding-block: 28px 64px; }
+  .wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 20px; }
+  code { font-family: var(--mono); font-size: .88em; color: var(--accent-hover); }
+
+  /* ---------- Page chrome ---------- */
+  header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
+  header.top h1 { font-family: var(--display); font-weight: 700; font-size: clamp(28px, 4vw, 40px); letter-spacing: .14em; margin: 0; line-height: 1.1; text-wrap: balance; }
+  header.top h1 span { color: var(--accent); font-weight: 500; letter-spacing: .06em; }
+  header.top p { margin: 4px 0 0; color: var(--muted); max-width: 64ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-p { font: 600 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); border-radius: 2px; padding: 6px 8px; white-space: nowrap; }
+  nav.screens { display: flex; gap: 4px 22px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  nav.screens button { font: 600 14px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); padding: 12px 2px; margin-bottom: -1px; cursor: pointer; }
+  nav.screens button:hover { color: var(--text); }
+  nav.screens button[aria-selected="true"] { color: var(--accent); border-color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent-hover); outline-offset: 2px; }
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 32px; color: var(--muted); font-size: 15px; }
+  .notes h3 { font: 600 13px/1.2 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--text); margin: 0 0 4px; }
+  .notes p { margin: 0; }
+  .hint-line { color: var(--muted); font-size: 14px; margin: -8px 0 0; }
+
+  /* ---------- Scaled 1920x1080 stage ---------- */
+  .viewport { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--border); border-radius: 4px; background: #000; }
+  .stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; font-size: 18px; line-height: 1.3; }
+  .screen { position: absolute; inset: 0; }
+  .screen[hidden] { display: none !important; }
+
+  /* Space backdrop (stand-in for the 3D scene) */
+  .space { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 30% 40%, #101A33 0%, #060A13 70%); overflow: hidden; }
+  .space canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .planet { position: absolute; border-radius: 50%; }
+  .planet.big { width: 1300px; height: 1300px; right: -420px; bottom: -900px;
+    background: radial-gradient(circle at 35% 25%, #2F6A8F 0%, #1A3A5E 30%, #0B1830 60%, #050A16 75%);
+    box-shadow: 0 0 120px 30px rgba(92,214,240,.18), inset 40px 40px 120px rgba(160,220,255,.15); }
+  .planet.moon { width: 150px; height: 150px; left: 58%; top: 16%; background: radial-gradient(circle at 30% 30%, #C9B8A4, #6D5E52 60%, #2A241F); box-shadow: inset -30px -20px 50px rgba(0,0,0,.6); }
+  .station { position: absolute; left: 30%; top: 44%; width: 320px; height: 14px; background: linear-gradient(90deg, #26303F, #4B5A74, #26303F); transform: rotate(-8deg); border-radius: 2px; }
+  .station::before, .station::after { content: ""; position: absolute; top: -40px; width: 60px; height: 94px; background: repeating-linear-gradient(0deg, #1C2E4A 0 6px, #0F1A2C 6px 8px); border: 1px solid #36507A; }
+  .station::before { left: 20px; } .station::after { right: 20px; }
+  .station i { position: absolute; left: 50%; top: -22px; width: 56px; height: 56px; margin-left: -28px; border-radius: 50%; background: #2A3548; border: 2px solid #4B5A74; box-shadow: 0 0 18px rgba(255,181,71,.5); }
+  .craft { position: absolute; width: 0; height: 0; }
+  .craft.enemy { left: 1180px; top: 380px; border-left: 26px solid transparent; border-right: 26px solid transparent; border-top: 16px solid #3A2A30; filter: drop-shadow(0 0 6px rgba(255,90,95,.8)); }
+  .craft.ally { left: 700px; top: 330px; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 12px solid #2A3A50; filter: drop-shadow(0 0 6px rgba(77,163,255,.8)); }
+  .tag { position: absolute; font: 700 14px var(--body); transform: translate(-50%, -150%); white-space: nowrap; text-shadow: 0 1px 2px #000; }
+  .tag b { display: block; height: 3px; margin-top: 2px; background: currentColor; }
+  .dim .space { filter: brightness(.7) saturate(.8); }
+
+  /* ---------- Components ---------- */
+  .panel { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
+  .panel.glass { background: var(--glass); border-color: rgba(54,80,122,.6); backdrop-filter: blur(6px); }
+  .panel .corner { position: absolute; left: -1px; top: -1px; width: 28px; height: 3px; background: var(--accent); }
+  .phead { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .t-display { font-family: var(--display); font-weight: 700; font-size: 96px; letter-spacing: .12em; line-height: 1; }
+  .t-h1 { font-family: var(--display); font-weight: 700; font-size: 44px; letter-spacing: .08em; line-height: 1.1; }
+  .t-h2 { font-family: var(--display); font-weight: 700; font-size: 30px; letter-spacing: .08em; }
+  .t-h3 { font-family: var(--display); font-weight: 600; font-size: 22px; }
+  .t-label { font: 600 14px/1.2 var(--display); letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
+  .t-caption { font-size: 14px; color: var(--muted); }
+  .t-micro { font: 500 12px var(--mono); color: var(--muted); letter-spacing: .06em; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .btn { display: flex; align-items: center; height: 52px; min-width: 260px; padding: 0 24px; background: var(--raised); color: var(--text); border: 1px solid var(--border-strong); border-left-width: 3px; border-radius: 2px; font: 700 18px/1 var(--display); letter-spacing: .18em; text-transform: uppercase; cursor: pointer; transition: background-color .12s, border-color .12s, transform .12s, color .12s; }
+  .btn:hover, .btn.is-hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-hover); transform: translateX(8px); }
+  .btn:active, .btn.is-pressed { background: var(--accent-pressed); color: var(--on-accent); }
+  .btn:disabled { color: var(--disabled); border-color: var(--border); background: var(--surface); transform: none; cursor: default; }
+  .btn.primary { background: var(--accent); border-color: var(--accent-hover); color: var(--on-accent); }
+  .btn.primary:hover, .btn.primary.is-hover { background: var(--accent-hover); color: var(--on-accent); }
+  .btn.ghost { background: transparent; border-color: transparent; }
+  .btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,107,90,.12); }
+  .btn.small { height: 40px; min-width: 120px; font-size: 14px; justify-content: center; padding: 0 16px; }
+  .btn.small:hover { transform: none; }
+  .btn.icon { width: 40px; min-width: 40px; height: 40px; padding: 0; justify-content: center; border-left-width: 1px; }
+
+  .bar { position: relative; height: 14px; border-radius: 2px; overflow: hidden; flex: 1; }
+  .bar .trail, .bar .fill { position: absolute; left: 0; top: 0; bottom: 0; }
+  .bar .trail { background: rgba(255,255,255,.5); transition: width .6s .3s; }
+  .bar .fill { transition: width .2s; }
+  .bar.shield { background: var(--shield-back); } .bar.shield .fill { background: var(--shield); }
+  .bar.hull { background: var(--hull-back); } .bar.hull .fill { background: var(--hull); }
+  .bar.hull.critical .fill { background: var(--danger); }
+  .bar.energy { background: var(--energy-back); height: 8px; } .bar.energy .fill { background: var(--energy); }
+  .bar.mini { height: 4px; margin-bottom: 2px; }
+
+  .ability { position: relative; width: 60px; height: 60px; margin-left: 8px; background: var(--raised); border: 2px solid var(--border-strong); border-radius: 4px; overflow: hidden; display: grid; place-items: center; }
+  .ability.ready { border-color: var(--accent); }
+  .ability svg { width: 32px; height: 32px; color: var(--text); }
+  .ability:not(.ready) svg { opacity: .35; }
+  .ability .cd { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(4,7,14,.78); }
+  .ability .timer { position: absolute; inset: 0; display: grid; place-items: center; font: 700 22px var(--mono); }
+  .ability .key { position: absolute; left: 4px; top: 2px; font: 700 12px var(--mono); color: var(--muted); }
+
+  .tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .tab { background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 8px 4px; color: var(--muted); font: 600 14px/1 var(--display); letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-color: var(--accent); }
+
+  .prow { display: flex; align-items: center; height: 48px; padding: 0 12px; margin-bottom: 2px; background: var(--raised); border-left: 3px solid var(--border-strong); gap: 12px; }
+  .prow.blue { border-color: var(--blue); } .prow.red { border-color: var(--red); }
+  .prow.local { background: var(--accent-soft); } .prow.local .pname { color: var(--accent); }
+  .prow.dead { opacity: .5; }
+  .prow.empty { background: var(--sunken); border-color: var(--border); }
+  .prow .pname { flex: 1; font-weight: 700; font-size: 16px; }
+  .prow .cell { width: 64px; text-align: right; font: 500 15px var(--mono); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #36507A, #152036); flex: none; }
+  .voice { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex: none; }
+  .voice.talking { background: var(--success); box-shadow: 0 0 0 3px rgba(95,214,138,.25); }
+  .voice.muted { background: var(--danger); }
+  .chip { padding: 2px 8px; border: 1px solid var(--border-strong); border-radius: 2px; font: 700 11px var(--mono); letter-spacing: .1em; color: var(--muted); }
+  .chip.ready { border-color: var(--success); color: var(--success); }
+  .chip.host { border-color: var(--accent); color: var(--accent); }
+  .ping { font: 700 14px var(--mono); }
+  .ping.good { color: var(--success); } .ping.ok { color: var(--accent); } .ping.bad { color: var(--danger); }
+
+  .chat-line { font-size: 16px; margin-bottom: 2px; text-shadow: 1px 1px 0 rgba(0,0,0,.9); }
+  .chat-line.team { color: var(--blue); } .chat-line.squad { color: var(--energy); } .chat-line.system { color: var(--muted); font-style: italic; }
+  .chat-input { width: 100%; margin-top: 8px; background: var(--glass); border: 1px solid var(--border-strong); color: var(--text); padding: 8px; font: 500 16px var(--body); border-radius: 2px; }
+
+  .keycap { display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 8px; background: var(--raised); border: 1px solid var(--border-strong); border-bottom-width: 3px; border-radius: 2px; font: 700 13px var(--mono); }
+  .hints { display: flex; align-items: center; gap: 8px; }
+  .hints .t-caption { margin-right: 12px; }
+
+  /* ---------- Main menu ---------- */
+  .mm { padding: 48px 120px; display: flex; }
+  .mm-col { position: relative; width: 560px; display: flex; flex-direction: column; justify-content: center; }
+  .mm-rule { width: 160px; height: 2px; background: var(--accent); margin: 16px 0; }
+  .mm-nav { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 48px; }
+  .mm-side { position: absolute; right: 120px; top: 48px; width: 380px; }
+  .profile { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .profile .av { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--accent); background: linear-gradient(135deg, #36507A, #152036); }
+  .friend { display: flex; align-items: center; gap: 12px; height: 48px; border-bottom: 1px solid var(--border); }
+  .friend .st { width: 8px; height: 8px; border-radius: 50%; background: var(--disabled); }
+  .friend .st.on { background: var(--success); } .friend .st.match { background: var(--accent); }
+  .friend .fn { flex: 1; font-size: 16px; }
+  .mm-foot { position: absolute; left: 120px; right: 120px; bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
+
+  /* ---------- Lobby ---------- */
+  .lobby { padding: 48px 120px; display: flex; flex-direction: column; background: linear-gradient(180deg, rgba(6,10,19,.4), rgba(6,10,19,.92) 40%); }
+  .lb-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+  .lb-body { flex: 1; display: flex; gap: 24px; min-height: 0; }
+  .lb-find { flex: 1; display: flex; flex-direction: column; }
+  .lb-side { width: 520px; display: flex; flex-direction: column; gap: 16px; }
+  .modes { display: flex; gap: 12px; }
+  .mode { flex: 1; height: 330px; padding: 16px; display: flex; flex-direction: column; justify-content: flex-end; background: var(--raised); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; text-align: left; color: var(--text); transition: border-color .12s, transform .12s; position: relative; overflow: hidden; font: inherit; }
+  .mode:hover { border-color: var(--border-strong); transform: translateY(-4px); }
+  .mode.sel { border-color: var(--accent); }
+  .mode .art { position: absolute; inset: 0; opacity: .9; }
+  .mode > div { position: relative; }
+  .mode .mn { font: 700 22px var(--display); letter-spacing: .04em; }
+  .mode .mm2 { font-size: 14px; color: var(--muted); }
+  .mm-row { display: flex; align-items: center; gap: 24px; margin-top: 24px; }
+  .mm-row .btn { margin: 0; }
+  .mm-row.searching .btn.primary { background: var(--raised); color: var(--accent); border-color: var(--accent); }
+  .pulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-right: 10px; animation: pulse 1s infinite alternate; vertical-align: middle; }
+  @keyframes pulse { from { opacity: .3; } to { opacity: 1; } }
+  .srv { width: 100%; border-collapse: collapse; }
+  .srv th { font: 600 13px var(--display); letter-spacing: .18em; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .srv td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 16px; }
+  .srv td.r, .srv th.r { text-align: right; }
+  .srv tr.full td { opacity: .5; }
+  .srv tbody tr:hover td { background: var(--accent-soft); }
+  .lb-chat { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; }
+  .field { display: grid; gap: 6px; max-width: 360px; }
+  .field input { background: var(--sunken); border: 1px solid var(--border-strong); color: var(--text); padding: 10px 12px; font: 700 22px var(--mono); letter-spacing: .3em; text-transform: uppercase; border-radius: 2px; }
+
+  /* ---------- HUD ---------- */
+  .hud { padding: 24px; }
+  .radar { position: relative; width: 220px; height: 220px; border-radius: 50%; border: 2px solid var(--border-strong); background: var(--glass); overflow: hidden; }
+  .radar .ring { position: absolute; left: 55px; top: 55px; width: 106px; height: 106px; border-radius: 50%; border: 1px solid var(--border); }
+  .radar .sweep { position: absolute; inset: 0; background: conic-gradient(from 0deg, rgba(92,214,240,.22), transparent 25%); animation: spin 4s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .radar .self { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: var(--accent); transform: rotate(45deg); }
+  .blip { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; }
+  .blip.ally { background: var(--blue); } .blip.enemy { background: var(--red); } .blip.objb { background: var(--accent); border-radius: 0; transform: rotate(45deg); }
+  .squad { width: 260px; margin-top: 16px; display: grid; gap: 8px; }
+  .sq { display: flex; align-items: center; gap: 8px; }
+  .sq .n { width: 110px; font-size: 14px; font-weight: 700; }
+  .sq.down .n { color: var(--danger); }
+  .sq .bars { flex: 1; }
+  .matchbar { position: absolute; top: 24px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .scores { display: flex; align-items: center; background: var(--glass); border-radius: 4px; overflow: hidden; }
+  .scores .s { width: 96px; height: 52px; display: grid; place-items: center; font: 700 30px var(--mono); border-bottom: 3px solid; }
+  .scores .s.b { background: var(--blue-soft); color: var(--blue); } .scores .s.r { background: var(--red-soft); color: var(--red); }
+  .scores .tm { width: 120px; text-align: center; font: 700 22px var(--mono); }
+  .objs { display: flex; gap: 14px; }
+  .obj { width: 32px; height: 32px; border: 2px solid var(--muted); background: var(--glass); transform: rotate(45deg); display: grid; place-items: center; }
+  .obj span { transform: rotate(-45deg); font: 700 14px var(--mono); }
+  .obj.b { border-color: var(--blue); background: var(--blue-soft); } .obj.r { border-color: var(--red); background: var(--red-soft); }
+  .obj.contested { border-color: var(--accent); animation: pulse .6s infinite alternate; }
+  .toast { display: inline-flex; align-items: center; gap: 12px; padding: 8px 24px; background: var(--glass); border: 1px solid var(--border); border-left: 4px solid var(--accent); transition: opacity .25s, transform .25s; }
+  .toast.b { border-left-color: var(--blue); } .toast.hidden { opacity: 0; transform: translateY(-16px); }
+  .toast-area { position: absolute; top: 150px; left: 0; right: 0; display: flex; justify-content: center; }
+  .topright { position: absolute; top: 24px; right: 24px; display: flex; flex-direction: column; align-items: flex-end; }
+  .net { display: flex; gap: 12px; margin-bottom: 12px; }
+  .kill { display: flex; align-items: center; gap: 12px; padding: 4px 12px; margin-bottom: 4px; background: var(--glass); font-weight: 700; font-size: 16px; transition: opacity .4s; }
+  .kill.local { box-shadow: inset 0 0 0 1px var(--accent); }
+  .kill .w { color: var(--muted); font: 500 13px var(--mono); }
+  .kill.fade { opacity: 0; }
+  .b-t { color: var(--blue); } .r-t { color: var(--red); }
+  .xhair { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+  .xhair i { position: absolute; background: var(--text); opacity: .8; }
+  .xhair .l { left: 0; top: 19px; width: 10px; height: 2px; } .xhair .r { right: 0; top: 19px; width: 10px; height: 2px; }
+  .xhair .t { left: 19px; top: 0; width: 2px; height: 10px; } .xhair .b { left: 19px; bottom: 0; width: 2px; height: 10px; }
+  .xhair .d { left: 18px; top: 18px; width: 4px; height: 4px; border-radius: 50%; opacity: 1; }
+  .xhair.hit i:not(.d) { background: var(--accent); opacity: 1; }
+  .xhair.kill i:not(.d) { background: var(--danger); opacity: 1; }
+  .hud-bottom { position: absolute; left: 24px; right: 24px; bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .hchat { width: 460px; }
+  .ship { width: 420px; padding: 12px 16px; background: var(--glass); border-radius: 4px; }
+  .srow { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .srow .lb { width: 64px; font: 700 12px var(--mono); letter-spacing: .1em; color: var(--muted); }
+  .srow .v { width: 56px; text-align: right; font: 700 14px var(--mono); }
+  .speed { display: flex; justify-content: flex-end; align-items: baseline; gap: 6px; }
+  .readout { font: 700 40px/1 var(--mono); font-variant-numeric: tabular-nums; }
+  .weapon { display: flex; flex-direction: column; align-items: flex-end; }
+  .ammo { display: flex; align-items: baseline; gap: 8px; }
+  .ammo .res { font: 500 22px var(--mono); color: var(--muted); }
+  .ammo.low .readout { color: var(--danger); }
+  .abil { display: flex; margin-top: 12px; }
+
+  /* ---------- Overlays ---------- */
+  .scrim { position: absolute; inset: 0; background: var(--scrim); backdrop-filter: blur(3px); }
+  .center { position: absolute; inset: 0; display: grid; place-items: center; }
+  .sb { width: 1400px; }
+  .sb-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+  .teams { display: flex; gap: 24px; }
+  .team { flex: 1; }
+  .thead { display: flex; align-items: center; height: 56px; padding: 0 12px; margin-bottom: 8px; border-bottom: 3px solid; }
+  .team.b .thead { background: var(--blue-soft); border-color: var(--blue); color: var(--blue); }
+  .team.r .thead { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+  .thead .tn { flex: 1; font: 700 22px var(--display); letter-spacing: .12em; }
+  .thead .ts { font: 700 30px var(--mono); color: var(--text); }
+  .cols { display: flex; padding: 0 12px 4px 37px; gap: 12px; }
+  .cols span { width: 64px; text-align: right; }
+  .cols span:first-child { flex: 1; width: auto; text-align: left; }
+  .pause { width: 440px; display: flex; flex-direction: column; gap: 12px; }
+  .pause .btn { min-width: 0; }
+  .notice { padding: 8px 12px; background: var(--accent-soft); border-left: 3px solid var(--accent); font-size: 14px; }
+  .settings { width: 1100px; height: 760px; display: flex; flex-direction: column; }
+  .sbody { flex: 1; overflow: auto; }
+  .row { display: flex; align-items: center; min-height: 56px; padding: 0 12px; border-bottom: 1px solid var(--border); gap: 16px; }
+  .row:hover { background: var(--accent-soft); }
+  .row label { width: 320px; flex: none; }
+  .row .ctl { flex: 1; display: flex; align-items: center; gap: 16px; }
+  .row input[type="range"] { flex: 1; accent-color: var(--accent); }
+  .row output { width: 64px; text-align: right; color: var(--accent); font: 700 16px var(--mono); }
+  .row select { flex: 1; background: var(--sunken); color: var(--text); border: 1px solid var(--border-strong); border-radius: 2px; padding: 8px 12px; font: 500 18px var(--body); }
+  .row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); }
+  .sfoot { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; }
+  .sfoot div { display: flex; gap: 8px; }
+
+  /* ---------- Style guide (normal flow) ---------- */
+  .guide { display: grid; gap: 28px; }
+  .guide h2 { font: 700 20px var(--display); letter-spacing: .14em; text-transform: uppercase; margin: 0 0 12px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .sw { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--surface); }
+  .sw i { display: block; height: 56px; }
+  .sw div { padding: 8px 10px; font-size: 13px; }
+  .sw b { display: block; font: 700 13px var(--mono); }
+  .sw code { color: var(--muted); }
+  .typescale { display: grid; gap: 10px; }
+  .typescale div { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 8px; min-width: 0; }
+  .typescale small { width: 170px; flex: none; color: var(--muted); font: 500 12px var(--mono); }
+  .demo { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
+  .demo .btn { min-width: 200px; }
+  .guide .panel { padding: 20px; }
+  .gbars { display: grid; gap: 10px; width: min(420px, 100%); }
+  .gbars .srow { margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-dash" viewBox="0 0 32 32"><path fill="currentColor" d="M4 9h10v3H4zm3 5.5h12v3H7zM4 20h10v3H4zm14-12 11 8-11 8z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 32 32"><path fill="currentColor" d="M16 3l11 4v8c0 7-5 12-11 14C10 27 5 22 5 15V7z"/></symbol>
+    <symbol id="i-emp" viewBox="0 0 32 32"><path fill="currentColor" d="M16 4a12 12 0 1 1 0 24 12 12 0 0 1 0-24zm0 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm1 2-5 7h4l-1 5 5-7h-4z"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>DRIFTLINE <span>UI Kit</span></h1>
+      <p>Unity로 만드는 우주 배경 멀티플레이 슈터의 UI 화면입니다. 이 페이지의 색상, 크기, 컴포넌트는 <code>Assets/UI/Styles/*.uss</code>와 똑같이 맞춰져 있어 UXML 화면의 시각 기준으로 쓰면 됩니다.</p>
+    </div>
+    <div class="meta">
+      <span class="chip-p">Unity UI Toolkit</span>
+      <span class="chip-p">1920×1080 ref</span>
+      <span class="chip-p">6대6 온라인</span>
+    </div>
+  </header>
+
+  <nav class="screens" role="tablist" aria-label="Screens">
+    <button role="tab" id="t-menu" data-view="menu" aria-selected="true">메인 메뉴</button>
+    <button role="tab" id="t-lobby" data-view="lobby" aria-selected="false">로비</button>
+    <button role="tab" id="t-hud" data-view="hud" aria-selected="false">HUD</button>
+    <button role="tab" id="t-score" data-view="score" aria-selected="false">점수판</button>
+    <button role="tab" id="t-pause" data-view="pause" aria-selected="false">경기 중 메뉴</button>
+    <button role="tab" id="t-settings" data-view="settings" aria-selected="false">설정</button>
+    <button role="tab" id="t-guide" data-view="guide" aria-selected="false">스타일 가이드</button>
+  </nav>
+  <p class="hint-line" id="keyhint">게임과 같은 키로 조작할 수 있습니다. HUD에서 Esc는 메뉴, Tab을 누르고 있으면 점수판, Enter는 채팅입니다.</p>
+
+  <div class="viewport" id="viewport">
+    <div class="stage" id="stage">
+      <!-- Space scene, shared by all screens -->
+      <div class="screen" id="scene">
+        <div class="space">
+          <canvas id="stars"></canvas>
+          <div class="planet big"></div>
+          <div class="planet moon"></div>
+          <div id="world-objs" hidden>
+            <div class="station"><i></i></div>
+            <div class="craft ally"></div><div class="tag b-t" style="left:720px;top:330px">Kestrel<b></b></div>
+            <div class="craft enemy"></div><div class="tag r-t" style="left:1206px;top:380px">Wraith · 86m<b></b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN MENU -->
+      <section class="screen mm" id="v-menu">
+        <div class="mm-col">
+          <div class="t-display">DRIFTLINE</div>
+          <div class="mm-rule"></div>
+          <div class="t-label">Orbital combat · Season 1</div>
+          <div class="mm-nav">
+            <button class="btn primary" data-go="lobby">Play</button>
+            <button class="btn">Hangar</button>
+            <button class="btn" data-go="settings">Settings</button>
+            <button class="btn ghost danger">Quit</button>
+          </div>
+        </div>
+        <div class="panel glass mm-side">
+          <span class="corner"></span>
+          <div class="profile"><div class="av"></div><div><div class="t-h3">NOVA-7</div><div class="t-caption">Level 24 · Lieutenant</div></div></div>
+          <div class="phead"><span class="t-label">Friends</span><span class="t-caption">3 online</span></div>
+          <div class="friend"><span class="st on"></span><span class="fn">Kestrel</span><button class="btn small">Invite</button></div>
+          <div class="friend"><span class="st match"></span><span class="fn">Halcyon</span><span class="t-caption">In match</span></div>
+          <div class="friend"><span class="st on"></span><span class="fn">Orbit_Jin</span><button class="btn small">Invite</button></div>
+          <div class="friend"><span class="st"></span><span class="fn" style="color:var(--disabled)">Vesper</span><span class="t-caption">Offline</span></div>
+        </div>
+        <div class="mm-foot">
+          <div class="hints"><span class="keycap">↑↓</span><span class="t-caption">Navigate</span><span class="keycap">Enter</span><span class="t-caption">Select</span></div>
+          <div class="hints"><span class="t-caption">Region: Seoul</span><span class="ping good">18 ms</span><span class="t-micro">v0.1.0</span></div>
+        </div>
+      </section>
+
+      <!-- LOBBY -->
+      <section class="screen lobby" id="v-lobby" hidden>
+        <div class="lb-head">
+          <div><div class="t-label">Play</div><div class="t-h1">Find a match</div></div>
+          <button class="btn small" data-go="menu">Back</button>
+        </div>
+        <div class="lb-body">
+          <div class="panel lb-find">
+            <span class="corner"></span>
+            <div class="tabs" id="lbTabs">
+              <button class="tab active" data-page="quick">Quick match</button>
+              <button class="tab" data-page="servers">Server browser</button>
+              <button class="tab" data-page="private">Private room</button>
+            </div>
+            <div data-lb="quick">
+              <div class="modes" id="modes"></div>
+              <div class="mm-row" id="mmRow">
+                <button class="btn primary" id="findBtn">Find match</button>
+                <div><div class="t-h3" id="mmStatus">Capture the Relay</div><div class="t-caption" id="mmDetail">Estimated wait 0:25 · 1,842 pilots online · Seoul</div></div>
+              </div>
+            </div>
+            <div data-lb="servers" hidden style="overflow-x:auto">
+              <table class="srv">
+                <thead><tr><th>Server</th><th>Map</th><th>Mode</th><th class="r">Pilots</th><th class="r">Ping</th></tr></thead>
+                <tbody id="servers"></tbody>
+              </table>
+            </div>
+            <div data-lb="private" hidden>
+              <div class="field"><label class="t-label" for="roomcode">Room code</label><input id="roomcode" maxlength="6" value="K7Q2XD"></div>
+              <div style="display:flex;gap:8px;margin-top:16px"><button class="btn primary small">Join</button><button class="btn small">Create room</button></div>
+            </div>
+          </div>
+          <div class="lb-side">
+            <div class="panel">
+              <div class="phead"><span class="t-label">Squad</span><span class="t-caption num">3 / 4</span></div>
+              <div id="squadRows"></div>
+              <div style="display:flex;justify-content:space-between;margin-top:12px"><button class="btn small">Invite</button><button class="btn primary small" id="readyBtn">Ready</button></div>
+            </div>
+            <div class="panel lb-chat">
+              <div class="chat-line system">Kestrel joined the squad.</div>
+              <div class="chat-line squad">[SQUAD] Kestrel: relay mode? I'll take the heavy frame</div>
+              <div class="chat-line squad">[SQUAD] Orbit_Jin: sure, I'm on support</div>
+              <div id="lbChatLog"></div>
+              <input class="chat-input" id="lbChat" placeholder="Message squad · Enter to send" aria-label="Lobby chat">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HUD -->
+      <section class="screen hud" id="v-hud" hidden>
+        <div>
+          <div class="radar"><div class="sweep"></div><div class="ring"></div><div id="blips"></div><div class="self"></div></div>
+          <div class="squad">
+            <div class="sq"><span class="n">Kestrel</span><div class="bars"><div class="bar shield mini"><div class="fill" style="width:40%"></div></div><div class="bar hull mini"><div class="fill" style="width:90%"></div></div></div></div>
+            <div class="sq down"><span class="n">Orbit_Jin ✕</span><div class="bars"><div class="bar shield mini"></div><div class="bar hull mini"></div></div></div>
+            <div class="sq"><span class="n">Talon</span><div class="bars"><div class="bar shield mini"><div class="fill" style="width:100%"></div></div><div class="bar hull mini"><div class="fill" style="width:62%"></div></div></div></div>
+          </div>
+        </div>
+        <div class="matchbar">
+          <div class="scores"><span class="s b" id="scB">42</span><span class="tm" id="timer">07:32</span><span class="s r" id="scR">37</span></div>
+          <div class="objs"><span class="obj b"><span>A</span></span><span class="obj r contested"><span>B</span></span><span class="obj"><span>C</span></span></div>
+        </div>
+        <div class="toast-area"><div class="toast b hidden" id="toast"><span class="t-label b-t">Relay A</span><span>Captured by your team</span></div></div>
+        <div class="topright">
+          <div class="net"><span class="t-micro" id="fps">144 FPS</span><span class="ping good" id="ping">32 ms</span></div>
+          <div id="killfeed"></div>
+        </div>
+        <div class="xhair" id="xhair"><i class="l"></i><i class="r"></i><i class="t"></i><i class="b"></i><i class="d"></i></div>
+        <div class="hud-bottom">
+          <div class="hchat">
+            <div id="hudChat">
+              <div class="chat-line system">Match started. Capture the relays.</div>
+              <div class="chat-line team">[TEAM] Kestrel: pushing B, cover me</div>
+            </div>
+            <input class="chat-input" id="hudInput" placeholder="All chat · /t team · /s squad" aria-label="Match chat" hidden>
+          </div>
+          <div class="ship">
+            <div class="srow"><span class="lb">SHIELD</span><div class="bar shield" id="bShield"><div class="trail"></div><div class="fill"></div></div><span class="v" id="vShield">180</span></div>
+            <div class="srow"><span class="lb">HULL</span><div class="bar hull" id="bHull"><div class="trail"></div><div class="fill"></div></div><span class="v" id="vHull">250</span></div>
+            <div class="srow"><span class="lb">BOOST</span><div class="bar energy" id="bBoost"><div class="fill"></div></div><span class="v" id="vBoost">72%</span></div>
+            <div class="speed"><span class="readout" id="speed">214</span><span class="t-micro">M/S</span></div>
+          </div>
+          <div class="weapon">
+            <span class="t-label">Arc Rifle Mk II</span>
+            <div class="ammo" id="ammo"><span class="readout" id="mag">32</span><span class="res">/ 180</span></div>
+            <div class="abil" id="abil"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCOREBOARD -->
+      <section class="screen" id="v-score" hidden>
+        <div class="scrim"></div>
+        <div class="center">
+          <div class="panel glass sb">
+            <span class="corner"></span>
+            <div class="sb-head"><div><div class="t-label">Capture the Relay</div><div class="t-h2">Kepler Station</div></div><span class="t-caption num" id="sbTimer">07:32 remaining</span></div>
+            <div class="teams">
+              <div class="team b"><div class="thead"><span class="tn">AEGIS</span><span class="ts" id="sbB">42</span></div><div class="cols t-micro"><span>PILOT</span><span>K</span><span>D</span><span>A</span><span>SCORE</span><span>PING</span></div><div id="rowsB"></div></div>
+              <div class="team r"><div class="thead"><span class="tn">HELIX</span><span class="ts" id="sbR">37</span></div><div class="cols t-micro"><span>PILOT</span><span>K</span><span>D</span><span>A</span><span>SCORE</span><span>PING</span></div><div id="rowsR"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- IN-MATCH MENU -->
+      <section class="screen" id="v-pause" hidden>
+        <div class="scrim"></div>
+        <div class="center">
+          <div class="panel pause">
+            <span class="corner"></span>
+            <div class="t-h1">MENU</div>
+            <div class="notice">The match keeps running while this menu is open. Your ship stays in place.</div>
+            <button class="btn primary" data-go="hud">Resume</button>
+            <button class="btn" data-go="score">Scoreboard</button>
+            <button class="btn" data-go="settings">Settings</button>
+            <button class="btn ghost danger" data-go="menu">Leave match</button>
+            <div class="t-caption" style="text-align:center">Kepler Station · Capture the Relay · Seoul-02</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="screen" id="v-settings" hidden>
+        <div class="scrim"></div>
+        <div class="center">
+          <div class="panel settings">
+            <span class="corner"></span>
+            <div class="phead"><span class="t-h2">SETTINGS</span><button class="btn ghost icon" data-back aria-label="Close settings">✕</button></div>
+            <div class="tabs" id="setTabs">
+              <button class="tab active" data-page="graphics">Graphics</button>
+              <button class="tab" data-page="audio">Audio &amp; voice</button>
+              <button class="tab" data-page="controls">Controls</button>
+              <button class="tab" data-page="network">Network</button>
+            </div>
+            <div class="sbody">
+              <div data-set="graphics">
+                <div class="row"><label for="s-res">Resolution</label><div class="ctl"><select id="s-res"><option>1280 × 720</option><option>1600 × 900</option><option selected>1920 × 1080</option><option>2560 × 1440</option><option>3840 × 2160</option></select></div></div>
+                <div class="row"><label for="s-mode">Display mode</label><div class="ctl"><select id="s-mode"><option>Fullscreen</option><option>Borderless window</option><option>Windowed</option></select></div></div>
+                <div class="row"><label for="s-q">Quality preset</label><div class="ctl"><select id="s-q"><option>Low</option><option>Medium</option><option selected>High</option><option>Ultra</option></select></div></div>
+                <div class="row"><label for="s-fov">Field of view</label><div class="ctl"><input type="range" id="s-fov" min="70" max="110" value="90"><output for="s-fov">90</output></div></div>
+                <div class="row"><label for="s-vsync">V-Sync</label><div class="ctl"><input type="checkbox" id="s-vsync"></div></div>
+                <div class="row"><label for="s-fps">Frame rate limit</label><div class="ctl"><input type="range" id="s-fps" min="30" max="240" value="144"><output for="s-fps">144</output></div></div>
+              </div>
+              <div data-set="audio" hidden>
+                <div class="row"><label for="s-master">Master volume</label><div class="ctl"><input type="range" id="s-master" min="0" max="100" value="80"><output for="s-master">80</output></div></div>
+                <div class="row"><label for="s-music">Music</label><div class="ctl"><input type="range" id="s-music" min="0" max="100" value="50"><output for="s-music">50</output></div></div>
+                <div class="row"><label for="s-sfx">Effects</label><div class="ctl"><input type="range" id="s-sfx" min="0" max="100" value="90"><output for="s-sfx">90</output></div></div>
+                <div class="row"><label for="s-voice">Voice chat volume</label><div class="ctl"><input type="range" id="s-voice" min="0" max="100" value="100"><output for="s-voice">100</output></div></div>
+                <div class="row"><label for="s-vmode">Voice chat</label><div class="ctl"><select id="s-vmode"><option selected>Push to talk</option><option>Open mic</option><option>Off</option></select></div></div>
+                <div class="row"><label for="s-vch">Default voice channel</label><div class="ctl"><select id="s-vch"><option selected>Squad</option><option>Team</option></select></div></div>
+              </div>
+              <div data-set="controls" hidden>
+                <div class="row"><label for="s-sens">Mouse sensitivity</label><div class="ctl"><input type="range" id="s-sens" min="1" max="30" value="10" data-scale="10"><output for="s-sens">1.0</output></div></div>
+                <div class="row"><label for="s-inv">Invert pitch</label><div class="ctl"><input type="checkbox" id="s-inv"></div></div>
+                <div class="row"><label for="s-roll">Roll assist in zero-g</label><div class="ctl"><input type="checkbox" id="s-roll" checked></div></div>
+                <div class="row"><label for="s-vib">Controller vibration</label><div class="ctl"><input type="checkbox" id="s-vib" checked></div></div>
+              </div>
+              <div data-set="network" hidden>
+                <div class="row"><label for="s-region">Matchmaking region</label><div class="ctl"><select id="s-region"><option selected>Automatic</option><option>Seoul</option><option>Tokyo</option><option>Singapore</option><option>Frankfurt</option><option>US West</option><option>US East</option></select></div></div>
+                <div class="row"><label for="s-maxping">Max ping for matchmaking</label><div class="ctl"><input type="range" id="s-maxping" min="40" max="250" value="120" data-suffix=" ms"><output for="s-maxping">120 ms</output></div></div>
+                <div class="row"><label for="s-cross">Cross-platform play</label><div class="ctl"><input type="checkbox" id="s-cross" checked></div></div>
+                <div class="row"><label for="s-net">Show ping and FPS on HUD</label><div class="ctl"><input type="checkbox" id="s-net" checked></div></div>
+                <div class="row"><label for="s-chat">Text chat</label><div class="ctl"><select id="s-chat"><option selected>Everyone</option><option>Team only</option><option>Squad only</option><option>Off</option></select></div></div>
+                <div class="row"><label for="s-prof">Profanity filter</label><div class="ctl"><input type="checkbox" id="s-prof" checked></div></div>
+              </div>
+            </div>
+            <div class="sfoot">
+              <button class="btn ghost small">Reset to defaults</button>
+              <div><button class="btn small" data-back>Cancel</button><button class="btn primary small" data-back>Apply</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- STYLE GUIDE -->
+  <section class="guide" id="v-guide" hidden>
+    <div><h2>색상 토큰</h2><div class="swatches" id="swatches"></div></div>
+    <div>
+      <h2>글꼴</h2>
+      <div class="typescale">
+        <div><small>Display 96 · Chakra Petch</small><span class="t-display" style="font-size:clamp(34px,7vw,96px)">DRIFTLINE</span></div>
+        <div><small>H1 44</small><span class="t-h1" style="font-size:clamp(26px,4vw,44px)">Find a match</span></div>
+        <div><small>H2 30</small><span class="t-h2">Kepler Station</span></div>
+        <div><small>H3 22</small><span class="t-h3">Capture the Relay</span></div>
+        <div><small>Body 18 · Barlow</small><span style="font-size:18px">The match keeps running while this menu is open.</span></div>
+        <div><small>Label 14 · caps</small><span class="t-label">Squad</span></div>
+        <div><small>Readout 40 · JetBrains Mono</small><span class="readout">214</span><span class="t-micro">M/S</span></div>
+      </div>
+    </div>
+    <div>
+      <h2>버튼</h2>
+      <div class="panel demo">
+        <button class="btn primary">Primary</button>
+        <button class="btn">Default</button>
+        <button class="btn is-hover">Hover / focus</button>
+        <button class="btn is-pressed">Pressed</button>
+        <button class="btn" disabled>Disabled</button>
+        <button class="btn ghost danger">Leave match</button>
+      </div>
+    </div>
+    <div>
+      <h2>기체 상태와 스킬</h2>
+      <div class="panel demo" style="align-items:flex-start;gap:24px 48px">
+        <div class="gbars">
+          <div class="srow"><span class="lb">SHIELD</span><div class="bar shield"><div class="fill" style="width:62%"></div></div><span class="v">112</span></div>
+          <div class="srow"><span class="lb">HULL</span><div class="bar hull"><div class="fill" style="width:84%"></div></div><span class="v">210</span></div>
+          <div class="srow"><span class="lb">HULL</span><div class="bar hull critical"><div class="fill" style="width:18%"></div></div><span class="v" style="color:var(--danger)">45</span></div>
+          <div class="srow"><span class="lb">BOOST</span><div class="bar energy"><div class="fill" style="width:72%"></div></div><span class="v">72%</span></div>
+        </div>
+        <div style="display:flex">
+          <div class="ability ready"><svg><use href="#i-dash"/></svg><span class="key">Q</span></div>
+          <div class="ability"><svg><use href="#i-shield"/></svg><div class="cd" style="height:55%"></div><div class="timer">8</div><span class="key">E</span></div>
+          <div class="ability"><svg><use href="#i-emp"/></svg><div class="cd" style="height:10%"></div><div class="timer">0.6</div><span class="key">F</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h2>플레이어 행</h2>
+      <div class="panel" style="display:grid;gap:2px;max-width:640px">
+        <div class="prow blue local"><span class="voice talking"></span><span class="pname">NOVA-7 (you)</span><span class="chip host">LEADER</span><span class="ping good">18 ms</span></div>
+        <div class="prow blue"><span class="voice"></span><span class="pname">Kestrel</span><span class="chip ready">READY</span><span class="ping ok">74 ms</span></div>
+        <div class="prow red dead"><span class="voice muted"></span><span class="pname">Drift</span><span class="chip">NOT READY</span><span class="ping bad">131 ms</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="notes" id="notes"></div>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), viewport = $('viewport');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function fit() { stage.style.transform = 'scale(' + viewport.clientWidth / 1920 + ')'; }
+  new ResizeObserver(fit).observe(viewport);
+  fit();
+
+  // ---------- Starfield ----------
+  const stars = $('stars'), sctx = stars.getContext('2d');
+  const pts = Array.from({ length: 420 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + .2, p: Math.random() * 6, z: Math.random() }));
+  let drift = 0;
+  function drawStars(ts) {
+    const w = stars.width = 1920, h = stars.height = 1080;
+    sctx.clearRect(0, 0, w, h);
+    if (!reduce) drift += .00004;
+    pts.forEach(s => {
+      const x = ((s.x - drift * (s.z + .2)) % 1 + 1) % 1 * w;
+      const a = .35 + .55 * Math.abs(Math.sin(ts / 1600 + s.p));
+      sctx.fillStyle = s.z > .85 ? 'rgba(255,214,160,' + a + ')' : 'rgba(210,225,255,' + a + ')';
+      sctx.beginPath(); sctx.arc(x, s.y * h, s.r, 0, Math.PI * 2); sctx.fill();
+    });
+    if (!reduce) requestAnimationFrame(drawStars);
+  }
+  requestAnimationFrame(drawStars);
+
+  // ---------- Screens ----------
+  const notes = {
+    menu: [['파일', '<code>MainMenu.uxml</code> · <code>MainMenuController.cs</code>'], ['레이아웃', '왼쪽에 메뉴, 뒤로는 우주 장면이 보입니다. 오른쪽 반투명 패널에 프로필과 친구 목록이 있어 타이틀 화면에서 바로 초대할 수 있습니다.'], ['멀티플레이', '친구 상태 점: 초록은 온라인, 주황은 경기 중. 대기열에 들어가기 전에 하단에서 서버 지역과 핑을 확인할 수 있습니다.']],
+    lobby: [['파일', '<code>Lobby.uxml</code> · <code>LobbyController.cs</code> · <code>ChatView.cs</code>'], ['레이아웃', '왼쪽은 매치 찾기(빠른 매치, 서버 목록, 비공개 방), 오른쪽은 분대와 분대 채팅입니다.'], ['동작', '매치 찾기를 누르면 취소 버튼으로 바뀌고 대기 시간이 올라갑니다. 서버는 더블클릭으로 입장하며, 꽉 찬 서버는 흐리게 표시됩니다.']],
+    hud: [['파일', '<code>HUD.uxml</code> · <code>HUDController.cs</code>'], ['레이아웃', '왼쪽 위 레이더와 분대, 가운데 위 점수와 거점, 오른쪽 위 킬 피드. 아래쪽에 채팅, 기체 상태, 무기를 두고 화면 중앙은 비워 둡니다.'], ['동작', '선체가 25% 이하면 빨간색으로 바뀝니다. 명중 시 조준선이 주황, 처치 시 빨강으로 깜박입니다. 내가 관련된 킬은 주황 테두리로 표시됩니다.']],
+    score: [['파일', '<code>Scoreboard.uxml</code> · <code>ScoreboardController.cs</code>'], ['레이아웃', '두 팀 표를 나란히 두고 점수순으로 정렬합니다. 내 행은 주황으로 칠하고, 격추된 파일럿은 흐리게 보입니다.'], ['동작', 'Tab을 누르고 있는 동안만 보입니다. 음성 점: 초록은 말하는 중, 빨강은 음소거.']],
+    pause: [['파일', '<code>PauseMenu.uxml</code> · <code>PauseMenuController.cs</code>'], ['멀티플레이', '온라인 경기는 멈출 수 없어서 메뉴에 그 사실을 먼저 알립니다. <code>Time.timeScale</code>은 건드리지 않고, 게임플레이 코드는 <code>GameUI.BlocksGameplayInput</code>으로 입력을 막습니다.'], ['동작', 'Esc로 열고 닫습니다. 경기 나가기는 <code>LeaveMatchRequested</code> 이벤트를 먼저 보내 네트워크 연결을 정리하게 합니다.']],
+    settings: [['파일', '<code>Settings.uxml</code> · <code>SettingsController.cs</code>'], ['탭', '그래픽, 오디오·음성, 조작, 네트워크. 네트워크 탭에는 지역, 최대 핑, 크로스플레이, 채팅 필터가 있습니다.'], ['동작', '적용을 눌러야 PlayerPrefs에 저장됩니다. 취소와 Esc는 설정을 연 화면으로 돌아갑니다.']],
+    guide: [['출처', '모든 토큰은 <code>Assets/UI/Styles/Theme.uss</code>에 있습니다. 값을 바꾸면 모든 화면에 반영됩니다.'], ['색상 규칙', '주황은 나 자신과 누를 수 있는 것. 파랑과 빨강은 팀에만 씁니다. 청록은 실드 전용입니다.'], ['이름 규칙', 'BEM 클래스: <code>.bar</code>, <code>.bar__fill</code>, <code>.bar--shield</code>. 자세한 내용은 <code>Docs/UI_DESIGN.md</code>에 있습니다.']],
+  };
+  const tabs = document.querySelectorAll('nav.screens button');
+  let current = 'menu', beforeSettings = 'menu', tabHeld = false;
+  const inMatch = v => ['hud', 'score', 'pause'].includes(v) || (v === 'settings' && ['hud', 'score', 'pause'].includes(beforeSettings));
+
+  function show(view) {
+    if (view === 'settings' && current !== 'settings') beforeSettings = current;
+    current = view;
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.view === view)));
+    const match = inMatch(view);
+    viewport.hidden = view === 'guide';
+    $('v-guide').hidden = view !== 'guide';
+    $('world-objs').hidden = !match;
+    stage.classList.toggle('dim', view !== 'hud' && view !== 'menu');
+    $('v-menu').hidden = !(view === 'menu' || (view === 'settings' && beforeSettings === 'menu'));
+    $('v-lobby').hidden = !(view === 'lobby' || (view === 'settings' && beforeSettings === 'lobby'));
+    $('v-hud').hidden = !match;
+    $('v-score').hidden = !(view === 'score' || (view === 'hud' && tabHeld));
+    $('v-pause').hidden = view !== 'pause';
+    $('v-settings').hidden = view !== 'settings';
+    $('notes').innerHTML = notes[view].map(([h, p]) => '<div><h3>' + h + '</h3><p>' + p + '</p></div>').join('');
+    if (view !== 'guide') fit();
+    try { localStorage.setItem('driftline-view', view); } catch (e) {}
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.view)));
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
+  document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => show(beforeSettings)));
+
+  // ---------- Keyboard, mirroring GameUI.cs ----------
+  const hudInput = $('hudInput');
+  document.addEventListener('keydown', e => {
+    if (e.target === hudInput) {
+      if (e.key === 'Enter') { sendChat(hudInput.value); hudInput.value = ''; hudInput.hidden = true; e.preventDefault(); }
+      else if (e.key === 'Escape') { hudInput.value = ''; hudInput.hidden = true; }
+      return;
+    }
+    if (e.target.matches('input, select')) return;
+    if (e.key === 'Tab' && current === 'hud') { e.preventDefault(); if (!tabHeld) { tabHeld = true; show('hud'); } }
+    else if (e.key === 'Escape') {
+      if (current === 'hud') show('pause');
+      else if (current === 'pause' || current === 'score') show('hud');
+      else if (current === 'settings') show(beforeSettings);
+      else if (current === 'lobby') show('menu');
+    } else if (e.key === 'Enter' && current === 'hud') { e.preventDefault(); hudInput.hidden = false; hudInput.focus(); }
+  });
+  document.addEventListener('keyup', e => { if (e.key === 'Tab' && tabHeld) { tabHeld = false; if (current === 'hud') show('hud'); } });
+  function sendChat(raw) {
+    let text = raw.trim(), ch = 'all', pre = '';
+    if (!text) return;
+    if (text.startsWith('/t ')) { ch = 'team'; pre = '[TEAM] '; text = text.slice(3); }
+    else if (text.startsWith('/s ')) { ch = 'squad'; pre = '[SQUAD] '; text = text.slice(3); }
+    const line = document.createElement('div');
+    line.className = 'chat-line ' + ch;
+    line.textContent = pre + 'NOVA-7: ' + text;
+    const log = $('hudChat'); log.appendChild(line);
+    while (log.children.length > 6) log.firstElementChild.remove();
+  }
+  $('lbChat').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || !e.target.value.trim()) return;
+    const line = document.createElement('div');
+    line.className = 'chat-line squad';
+    line.textContent = '[SQUAD] NOVA-7: ' + e.target.value.trim();
+    $('lbChatLog').appendChild(line);
+    e.target.value = '';
+  });
+
+  // ---------- Data ----------
+  const players = [
+    { n: 'NOVA-7', t: 'b', k: 14, d: 6, a: 5, s: 2140, p: 18, local: true, talk: true },
+    { n: 'Kestrel', t: 'b', k: 11, d: 8, a: 9, s: 1890, p: 24 },
+    { n: 'Orbit_Jin', t: 'b', k: 7, d: 9, a: 12, s: 1520, p: 31, dead: true },
+    { n: 'Talon', t: 'b', k: 6, d: 7, a: 3, s: 980, p: 57 },
+    { n: 'Brightwater', t: 'b', k: 4, d: 8, a: 6, s: 760, p: 66 },
+    { n: 'Sable', t: 'b', k: 3, d: 9, a: 4, s: 610, p: 45 },
+    { n: 'Wraith', t: 'r', k: 13, d: 7, a: 4, s: 2010, p: 44 },
+    { n: 'Solace', t: 'r', k: 10, d: 10, a: 6, s: 1660, p: 38, muted: true },
+    { n: 'Pyre', t: 'r', k: 8, d: 11, a: 7, s: 1310, p: 96 },
+    { n: 'Drift', t: 'r', k: 6, d: 10, a: 2, s: 870, p: 131, dead: true },
+    { n: 'Mirage', t: 'r', k: 5, d: 9, a: 5, s: 820, p: 52 },
+    { n: 'Umbra', t: 'r', k: 4, d: 11, a: 3, s: 640, p: 71 },
+  ];
+  const pingCls = p => p < 60 ? 'good' : p < 120 ? 'ok' : 'bad';
+  function renderBoard() {
+    ['b', 'r'].forEach(t => {
+      $('rows' + t.toUpperCase()).innerHTML = players.filter(p => p.t === t).sort((x, y) => y.s - x.s).map(p =>
+        '<div class="prow ' + (t === 'b' ? 'blue' : 'red') + (p.local ? ' local' : '') + (p.dead ? ' dead' : '') + '">' +
+        '<span class="voice' + (p.talk ? ' talking' : p.muted ? ' muted' : '') + '"></span><span class="pname">' + p.n + '</span>' +
+        [p.k, p.d, p.a, p.s.toLocaleString('en-US')].map(v => '<span class="cell">' + v + '</span>').join('') +
+        '<span class="cell ping ' + pingCls(p.p) + '">' + p.p + '</span></div>').join('');
+    });
+    const sb = players.filter(p => p.t === 'b').reduce((a, p) => a + p.k, 0), sr = players.filter(p => p.t === 'r').reduce((a, p) => a + p.k, 0);
+    $('sbB').textContent = $('scB').textContent = sb;
+    $('sbR').textContent = $('scR').textContent = sr;
+  }
+  renderBoard();
+
+  $('squadRows').innerHTML = [
+    ['NOVA-7', 'local', 'host', true, 18, 'talking'], ['Kestrel', '', '', true, 24, ''], ['Orbit_Jin', '', '', false, 31, 'muted'],
+  ].map(([n, l, h, r, p, v]) => '<div class="prow' + (l ? ' local' : '') + '"><span class="voice ' + v + '"></span><span class="avatar"></span><span class="pname">' + n + '</span>' +
+    (h ? '<span class="chip host">LEADER</span>' : '') + '<span class="chip' + (r ? ' ready">READY' : '">NOT READY') + '</span><span class="ping ' + pingCls(p) + '">' + p + ' ms</span></div>').join('') +
+    '<div class="prow empty"><span class="pname t-caption" style="font-weight:500">Open slot</span></div>';
+
+  const modes = [
+    ['Team Deathmatch', '6v6 · First to 75 kills', 'radial-gradient(circle at 70% 30%, rgba(255,90,95,.35), transparent 60%), linear-gradient(160deg,#1B2440,#0B1120)'],
+    ['Capture the Relay', '6v6 · Hold 3 relay stations', 'radial-gradient(circle at 30% 30%, rgba(255,181,71,.35), transparent 60%), linear-gradient(160deg,#20263D,#0B1120)'],
+    ['Free for All', '8 pilots · 10 minutes', 'radial-gradient(circle at 60% 40%, rgba(92,214,240,.3), transparent 60%), linear-gradient(160deg,#142A3A,#0B1120)'],
+  ];
+  let mode = 1, searching = false, searchStart = 0;
+  function renderModes() {
+    $('modes').innerHTML = modes.map(([n, d, bg], i) => '<button class="mode' + (i === mode ? ' sel' : '') + '" data-i="' + i + '"><span class="art" style="background:' + bg + '"></span><div><div class="mn">' + n + '</div><div class="mm2">' + d + '</div></div></button>').join('');
+    $('modes').querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => { if (searching) return; mode = +b.dataset.i; $('mmStatus').textContent = modes[mode][0]; renderModes(); }));
+  }
+  renderModes();
+  $('findBtn').addEventListener('click', () => {
+    searching = !searching; searchStart = performance.now();
+    $('mmRow').classList.toggle('searching', searching);
+    $('findBtn').textContent = searching ? 'Cancel' : 'Find match';
+    if (!searching) $('mmStatus').textContent = modes[mode][0];
+  });
+  setInterval(() => {
+    if (!searching) return;
+    const s = Math.floor((performance.now() - searchStart) / 1000);
+    $('mmStatus').innerHTML = '<span class="pulse"></span>Searching ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }, 250);
+  let ready = false;
+  $('readyBtn').addEventListener('click', () => { ready = !ready; $('readyBtn').textContent = ready ? 'Not ready' : 'Ready'; });
+
+  $('servers').innerHTML = [
+    ['Seoul-02 · Ranked', 'Kepler Station', 'Capture the Relay', 11, 12, 18], ['Tokyo-01', 'Europa Rift', 'Team Deathmatch', 12, 12, 41],
+    ['Seoul-05', 'Ceres Belt', 'Free for All', 5, 8, 22], ['Singapore-03', 'Europa Rift', 'Capture the Relay', 8, 12, 88],
+    ['US West-07', 'Kepler Station', 'Team Deathmatch', 9, 12, 142],
+  ].map(([n, m, md, p, mx, pg]) => '<tr' + (p >= mx ? ' class="full"' : '') + '><td>' + n + '</td><td class="t-caption">' + m + '</td><td class="t-caption">' + md + '</td><td class="r num">' + p + ' / ' + mx + '</td><td class="r ping ' + pingCls(pg) + '">' + pg + '</td></tr>').join('');
+  document.querySelectorAll('#lbTabs .tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#lbTabs .tab').forEach(x => x.classList.toggle('active', x === b));
+    document.querySelectorAll('[data-lb]').forEach(p => p.hidden = p.dataset.lb !== b.dataset.page);
+  }));
+
+  // ---------- HUD simulation ----------
+  const abil = [['Q', 'i-dash', 8], ['E', 'i-shield', 14], ['F', 'i-emp', 30]].map(([k, ic, cd], i) => {
+    const el = document.createElement('div');
+    el.className = 'ability';
+    el.innerHTML = '<svg><use href="#' + ic + '"/></svg><div class="cd"></div><div class="timer"></div><span class="key">' + k + '</span>';
+    $('abil').appendChild(el);
+    return { el, cd, left: [0, 6, 21][i] };
+  });
+  const bar = (id, pct) => { const b = $(id); b.querySelector('.fill').style.width = pct + '%'; const t = b.querySelector('.trail'); if (t) t.style.width = pct + '%'; };
+  let t = 0, last = performance.now(), matchLeft = 452;
+  function tick(now) {
+    const dt = Math.min(.1, (now - last) / 1000); last = now; t += dt; matchLeft = Math.max(0, matchLeft - dt);
+    const sh = 110 + Math.sin(t * .6) * 70, hu = 150 + Math.sin(t * .25) * 110, bo = .6 + Math.sin(t * 1.3) * .4;
+    bar('bShield', sh / 180 * 100); $('vShield').textContent = Math.ceil(sh);
+    bar('bHull', hu / 250 * 100); $('vHull').textContent = Math.ceil(hu); $('bHull').classList.toggle('critical', hu / 250 <= .25);
+    bar('bBoost', bo * 100); $('vBoost').textContent = Math.round(bo * 100) + '%';
+    $('speed').textContent = Math.round(210 + Math.sin(t * .8) * 60);
+    const mag = Math.floor(((32 - t * 3) % 33 + 33) % 33);
+    $('mag').textContent = mag; $('ammo').classList.toggle('low', mag <= 8);
+    const mm = Math.floor(matchLeft / 60), ss = Math.floor(matchLeft % 60), ts = String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+    $('timer').textContent = ts; $('sbTimer').textContent = ts + ' remaining';
+    abil.forEach(a => {
+      a.left = Math.max(0, a.left - dt);
+      if (a.left === 0 && Math.random() < .004) a.left = a.cd;
+      const ready = a.left <= .05;
+      a.el.classList.toggle('ready', ready);
+      a.el.querySelector('.cd').style.height = a.left / a.cd * 100 + '%';
+      a.el.querySelector('.timer').textContent = ready ? '' : a.left < 1 ? a.left.toFixed(1) : Math.ceil(a.left);
+    });
+    $('blips').innerHTML = [[Math.sin(t * .3) * .5, .4, 'ally'], [.6, Math.cos(t * .4) * .6, 'enemy'], [-.3, -.7, 'objb'], [-.5, .1, 'ally']]
+      .map(([x, y, k]) => '<span class="blip ' + k + '" style="left:' + (50 + x * 46) + '%;top:' + (50 - y * 46) + '%"></span>').join('');
+    if (!reduce) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  if (reduce) setInterval(() => tick(performance.now()), 500);
+  setInterval(() => { $('fps').textContent = (138 + Math.floor(Math.random() * 12)) + ' FPS'; const p = 28 + Math.floor(Math.random() * 12); $('ping').textContent = p + ' ms'; }, 1000);
+
+  const feed = $('killfeed'), xh = $('xhair');
+  const weapons = ['Arc Rifle', 'Rail Lance', 'Flak Pod', 'Ion Burst'];
+  function addKill(initial) {
+    const killer = players[Math.floor(Math.random() * players.length)];
+    const foes = players.filter(p => p.t !== killer.t), victim = foes[Math.floor(Math.random() * foes.length)];
+    if (!initial) { killer.k++; killer.s += 100; victim.d++; renderBoard(); }
+    const row = document.createElement('div');
+    const local = killer.local || victim.local;
+    row.className = 'kill' + (local ? ' local' : '');
+    row.innerHTML = '<span class="' + killer.t + '-t">' + killer.n + '</span><span class="w">' + weapons[Math.floor(Math.random() * 4)] + '</span><span class="' + victim.t + '-t">' + victim.n + '</span>';
+    feed.appendChild(row);
+    while (feed.children.length > 5) feed.firstElementChild.remove();
+    setTimeout(() => row.classList.add('fade'), 6000); setTimeout(() => row.remove(), 6500);
+    if (killer.local) { xh.className = 'xhair kill'; setTimeout(() => xh.className = 'xhair', 400); }
+    else if (Math.random() < .5) { xh.className = 'xhair hit'; setTimeout(() => xh.className = 'xhair', 150); }
+  }
+  addKill(true); addKill(true); addKill(true);
+  setInterval(() => addKill(false), 3200);
+  const toast = $('toast');
+  function flashToast() { toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
+  setTimeout(flashToast, 500); setInterval(flashToast, 9000);
+
+  // ---------- Settings ----------
+  document.querySelectorAll('#setTabs .tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#setTabs .tab').forEach(x => x.classList.toggle('active', x === b));
+    document.querySelectorAll('[data-set]').forEach(p => p.hidden = p.dataset.set !== b.dataset.page);
+  }));
+  document.querySelectorAll('.row input[type="range"]').forEach(r => {
+    const out = r.parentElement.querySelector('output');
+    r.addEventListener('input', () => { out.textContent = r.dataset.scale ? (r.value / r.dataset.scale).toFixed(1) : r.value + (r.dataset.suffix || ''); });
+  });
+
+  // ---------- Style guide ----------
+  const tokens = [
+    ['bg', '#060A13', 'Screen background'], ['surface', '#0D1422', 'Panels'], ['surface-raised', '#152036', 'Buttons, rows'], ['border', '#22314D', 'Dividers'],
+    ['text', '#E6EDF7', 'Primary text'], ['text-muted', '#8C9BB5', 'Labels, captions'], ['accent', '#FFB547', 'You, actions, focus'],
+    ['team-blue', '#4DA3FF', 'Allies only'], ['team-red', '#FF5A5F', 'Enemies only'], ['shield', '#5CD6F0', 'Shield'], ['hull', '#E6EDF7', 'Hull'],
+    ['energy', '#9BE36A', 'Boost, squad chat'], ['success', '#5FD68A', 'Ready, good ping'], ['danger', '#FF6B5A', 'Critical, bad ping'],
+  ];
+  $('swatches').innerHTML = tokens.map(([n, h, u]) => '<div class="sw"><i style="background:' + h + '"></i><div><b>--color-' + n + '</b><code>' + h + '</code><br>' + u + '</div></div>').join('');
+
+  let start = 'menu';
+  try { const s = localStorage.getItem('driftline-view'); if (s && notes[s]) start = s; } catch (e) {}
+  if (/^#[a-z]+$/.test(location.hash) && notes[location.hash.slice(1)]) start = location.hash.slice(1);
+  show(start);
+})();
+</script>

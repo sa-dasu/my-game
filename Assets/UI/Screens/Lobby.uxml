@@ -1,0 +1,77 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="../Styles/Theme.uss" />
+    <Style src="../Styles/Components.uss" />
+    <Style src="../Styles/Screens.uss" />
+    <ui:VisualElement name="lobby" class="screen screen--lobby">
+        <ui:VisualElement class="lobby__header">
+            <ui:VisualElement>
+                <ui:Label text="PLAY" class="text-label" />
+                <ui:Label text="Find a match" class="text-h1" />
+            </ui:VisualElement>
+            <ui:Button name="btn-back" text="BACK" class="btn btn--small" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="lobby__body">
+            <!-- Left: quick match / server browser -->
+            <ui:VisualElement class="panel lobby__find">
+                <ui:VisualElement class="panel__corner" />
+                <ui:VisualElement class="tabs">
+                    <ui:Button name="tab-quick" text="QUICK MATCH" class="tab tab--active" />
+                    <ui:Button name="tab-servers" text="SERVER BROWSER" class="tab" />
+                    <ui:Button name="tab-private" text="PRIVATE ROOM" class="tab" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="page-quick" class="lobby__page">
+                    <ui:VisualElement name="mode-list" class="mode-list" />
+                    <ui:VisualElement name="matchmaking" class="matchmaking">
+                        <ui:Button name="btn-find" text="FIND MATCH" class="btn btn--primary" />
+                        <ui:VisualElement class="matchmaking__status">
+                            <ui:Label name="mm-status" text="Team Deathmatch · 6v6" class="text-h3" />
+                            <ui:Label name="mm-detail" text="Estimated wait 0:25 · 1,842 pilots online" class="text-caption" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="page-servers" class="lobby__page lobby__page--hidden">
+                    <ui:VisualElement class="server-table__head">
+                        <ui:Label text="SERVER" class="text-label col-name" />
+                        <ui:Label text="MAP" class="text-label col-map" />
+                        <ui:Label text="MODE" class="text-label col-mode" />
+                        <ui:Label text="PILOTS" class="text-label col-players" />
+                        <ui:Label text="PING" class="text-label col-ping" />
+                    </ui:VisualElement>
+                    <ui:ScrollView name="server-list" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="page-private" class="lobby__page lobby__page--hidden">
+                    <ui:TextField name="room-code" label="Room code" max-length="6" />
+                    <ui:VisualElement class="row" style="margin-top: 16px;">
+                        <ui:Button name="btn-join-room" text="JOIN" class="btn btn--primary btn--small" />
+                        <ui:Button name="btn-create-room" text="CREATE ROOM" class="btn btn--small" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Right: squad + chat -->
+            <ui:VisualElement class="lobby__side">
+                <ui:VisualElement class="panel">
+                    <ui:VisualElement class="panel__header">
+                        <ui:Label text="SQUAD" class="text-label" />
+                        <ui:Label name="squad-count" text="3 / 4" class="text-caption" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="squad-list" />
+                    <ui:VisualElement class="squad__footer">
+                        <ui:Button name="btn-invite" text="INVITE" class="btn btn--small" />
+                        <ui:Button name="btn-ready" text="READY" class="btn btn--primary btn--small" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="panel lobby__chat">
+                    <ui:VisualElement name="chat" class="chat">
+                        <ui:VisualElement name="chat-log" class="chat__log" />
+                        <ui:TextField name="chat-input" class="chat__input" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

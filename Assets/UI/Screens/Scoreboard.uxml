@@ -1,0 +1,50 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="../Styles/Theme.uss" />
+    <Style src="../Styles/Components.uss" />
+    <Style src="../Styles/Screens.uss" />
+    <ui:VisualElement name="scoreboard-screen" picking-mode="Ignore" class="screen screen--scoreboard">
+        <ui:VisualElement class="scrim" picking-mode="Ignore" />
+        <ui:VisualElement class="panel panel--glass scoreboard">
+            <ui:VisualElement class="panel__corner" />
+            <ui:VisualElement class="scoreboard__header">
+                <ui:VisualElement>
+                    <ui:Label name="sb-mode" text="CAPTURE THE RELAY" class="text-label" />
+                    <ui:Label name="sb-map" text="Kepler Station" class="text-h2" />
+                </ui:VisualElement>
+                <ui:Label name="sb-timer" text="07:32 remaining" class="text-caption" />
+            </ui:VisualElement>
+            <ui:VisualElement class="scoreboard__teams">
+                <ui:VisualElement class="team-table team-table--blue">
+                    <ui:VisualElement class="team-table__head">
+                        <ui:Label text="AEGIS" class="team-table__name" />
+                        <ui:Label name="sb-score-blue" text="42" class="team-table__score" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="team-table__columns">
+                        <ui:Label text="PILOT" class="text-micro grow" />
+                        <ui:Label text="K" class="text-micro player-row__cell" />
+                        <ui:Label text="D" class="text-micro player-row__cell" />
+                        <ui:Label text="A" class="text-micro player-row__cell" />
+                        <ui:Label text="SCORE" class="text-micro player-row__cell" />
+                        <ui:Label text="PING" class="text-micro player-row__cell" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="rows-blue" />
+                </ui:VisualElement>
+                <ui:VisualElement class="team-table team-table--red">
+                    <ui:VisualElement class="team-table__head">
+                        <ui:Label text="HELIX" class="team-table__name" />
+                        <ui:Label name="sb-score-red" text="37" class="team-table__score" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="team-table__columns">
+                        <ui:Label text="PILOT" class="text-micro grow" />
+                        <ui:Label text="K" class="text-micro player-row__cell" />
+                        <ui:Label text="D" class="text-micro player-row__cell" />
+                        <ui:Label text="A" class="text-micro player-row__cell" />
+                        <ui:Label text="SCORE" class="text-micro player-row__cell" />
+                        <ui:Label text="PING" class="text-micro player-row__cell" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="rows-red" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,53 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="../Styles/Theme.uss" />
+    <Style src="../Styles/Components.uss" />
+    <Style src="../Styles/Screens.uss" />
+    <ui:VisualElement name="main-menu" class="screen screen--main-menu">
+        <ui:VisualElement name="backdrop" picking-mode="Ignore" class="main-menu__backdrop" />
+
+        <ui:VisualElement class="main-menu__column">
+            <ui:VisualElement class="main-menu__brand">
+                <ui:Label text="DRIFTLINE" class="text-display" />
+                <ui:VisualElement class="main-menu__rule" />
+                <ui:Label text="ORBITAL COMBAT · SEASON 1" class="text-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="main-menu__nav">
+                <ui:Button name="btn-play" text="PLAY" class="btn btn--primary" />
+                <ui:Button name="btn-hangar" text="HANGAR" class="btn" />
+                <ui:Button name="btn-settings" text="SETTINGS" class="btn" />
+                <ui:Button name="btn-quit" text="QUIT" class="btn btn--ghost btn--danger" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Profile + friends -->
+        <ui:VisualElement class="panel panel--glass main-menu__side">
+            <ui:VisualElement class="panel__corner" />
+            <ui:VisualElement class="profile">
+                <ui:VisualElement name="profile-avatar" class="profile__avatar" />
+                <ui:VisualElement>
+                    <ui:Label name="profile-name" text="NOVA-7" class="profile__name" />
+                    <ui:Label name="profile-rank" text="Level 24 · Lieutenant" class="text-caption" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__header">
+                <ui:Label text="FRIENDS" class="text-label" />
+                <ui:Label name="friends-online" text="3 online" class="text-caption" />
+            </ui:VisualElement>
+            <ui:VisualElement name="friend-list" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="main-menu__footer">
+            <ui:VisualElement class="key-hints">
+                <ui:Label text="↑↓" class="key" />
+                <ui:Label text="Navigate" class="text-caption" />
+                <ui:Label text="Enter" class="key" />
+                <ui:Label text="Select" class="text-caption" />
+            </ui:VisualElement>
+            <ui:VisualElement class="row">
+                <ui:Label name="region" text="Region: Seoul" class="text-caption" />
+                <ui:Label name="region-ping" text="  18 ms" class="ping ping--good" />
+                <ui:Label name="version" text="   v0.1.0" class="text-caption" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

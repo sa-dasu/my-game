@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="../Styles/Theme.uss" />
+    <Style src="../Styles/Components.uss" />
+    <Style src="../Styles/Screens.uss" />
+    <ui:VisualElement name="pause-screen" class="screen screen--pause">
+        <ui:VisualElement class="scrim" />
+        <ui:VisualElement class="panel pause">
+            <ui:VisualElement class="panel__corner" />
+            <ui:Label text="MENU" class="text-h1" />
+            <ui:VisualElement class="pause__notice">
+                <ui:Label text="The match keeps running while this menu is open. Your ship stays in place." />
+            </ui:VisualElement>
+            <ui:Button name="btn-resume" text="RESUME" class="btn btn--primary" />
+            <ui:Button name="btn-scoreboard" text="SCOREBOARD" class="btn" />
+            <ui:Button name="btn-settings" text="SETTINGS" class="btn" />
+            <ui:Button name="btn-leave" text="LEAVE MATCH" class="btn btn--ghost btn--danger" />
+            <ui:Label name="match-info" text="Kepler Station · Capture the Relay · Seoul-02" class="text-caption pause__meta" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
