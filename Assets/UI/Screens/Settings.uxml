@@ -1,0 +1,117 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="../Styles/Theme.uss" />
+    <Style src="../Styles/Components.uss" />
+    <Style src="../Styles/Screens.uss" />
+    <ui:VisualElement name="settings-screen" class="screen screen--settings">
+        <ui:VisualElement class="scrim" />
+        <ui:VisualElement class="panel settings">
+            <ui:VisualElement class="panel__corner" />
+            <ui:VisualElement class="panel__header">
+                <ui:Label text="SETTINGS" class="text-h2" />
+                <ui:Button name="btn-close" text="✕" class="btn btn--ghost btn--icon" />
+            </ui:VisualElement>
+            <ui:VisualElement class="tabs">
+                <ui:Button name="tab-graphics" text="GRAPHICS" class="tab tab--active" />
+                <ui:Button name="tab-audio" text="AUDIO &amp; VOICE" class="tab" />
+                <ui:Button name="tab-controls" text="CONTROLS" class="tab" />
+                <ui:Button name="tab-network" text="NETWORK" class="tab" />
+            </ui:VisualElement>
+
+            <ui:ScrollView class="settings__body">
+                <ui:VisualElement name="page-graphics" class="settings__page">
+                    <ui:VisualElement class="setting-row">
+                        <ui:DropdownField name="resolution" label="Resolution" choices="1280 × 720,1600 × 900,1920 × 1080,2560 × 1440,3840 × 2160" index="2" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:DropdownField name="window-mode" label="Display mode" choices="Fullscreen,Borderless window,Windowed" index="0" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:DropdownField name="quality" label="Quality preset" choices="Low,Medium,High,Ultra" index="2" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:SliderInt name="fov" label="Field of view" low-value="70" high-value="110" value="90" />
+                        <ui:Label name="fov-value" text="90" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Toggle name="vsync" label="V-Sync" value="false" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:SliderInt name="fps-limit" label="Frame rate limit" low-value="30" high-value="240" value="144" />
+                        <ui:Label name="fps-limit-value" text="144" class="value-label" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="page-audio" class="settings__page settings__page--hidden">
+                    <ui:VisualElement class="setting-row">
+                        <ui:SliderInt name="vol-master" label="Master volume" low-value="0" high-value="100" value="80" />
+                        <ui:Label name="vol-master-value" text="80" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:SliderInt name="vol-music" label="Music" low-value="0" high-value="100" value="50" />
+                        <ui:Label name="vol-music-value" text="50" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:SliderInt name="vol-sfx" label="Effects" low-value="0" high-value="100" value="90" />
+                        <ui:Label name="vol-sfx-value" text="90" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:SliderInt name="vol-voice" label="Voice chat volume" low-value="0" high-value="100" value="100" />
+                        <ui:Label name="vol-voice-value" text="100" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:DropdownField name="voice-mode" label="Voice chat" choices="Push to talk,Open mic,Off" index="0" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:DropdownField name="voice-channel" label="Default voice channel" choices="Squad,Team" index="0" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="page-controls" class="settings__page settings__page--hidden">
+                    <ui:VisualElement class="setting-row">
+                        <ui:Slider name="mouse-sensitivity" label="Mouse sensitivity" low-value="0.1" high-value="3" value="1" />
+                        <ui:Label name="mouse-sensitivity-value" text="1.0" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Toggle name="invert-y" label="Invert pitch" value="false" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Toggle name="roll-assist" label="Roll assist in zero-g" value="true" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Toggle name="controller-vibration" label="Controller vibration" value="true" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="page-network" class="settings__page settings__page--hidden">
+                    <ui:VisualElement class="setting-row">
+                        <ui:DropdownField name="region" label="Matchmaking region" choices="Automatic,Seoul,Tokyo,Singapore,Frankfurt,US West,US East" index="0" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:SliderInt name="max-ping" label="Max ping for matchmaking" low-value="40" high-value="250" value="120" />
+                        <ui:Label name="max-ping-value" text="120" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Toggle name="crossplay" label="Cross-platform play" value="true" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Toggle name="show-netstats" label="Show ping and FPS on HUD" value="true" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:DropdownField name="chat-filter" label="Text chat" choices="Everyone,Team only,Squad only,Off" index="0" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Toggle name="profanity-filter" label="Profanity filter" value="true" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:ScrollView>
+
+            <ui:VisualElement class="settings__footer">
+                <ui:Button name="btn-reset" text="RESET TO DEFAULTS" class="btn btn--ghost btn--small" />
+                <ui:VisualElement class="settings__footer-actions">
+                    <ui:Button name="btn-cancel" text="CANCEL" class="btn btn--small" />
+                    <ui:Button name="btn-apply" text="APPLY" class="btn btn--primary btn--small" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

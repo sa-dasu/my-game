@@ -1,0 +1,101 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="../Styles/Theme.uss" />
+    <Style src="../Styles/Components.uss" />
+    <Style src="../Styles/Screens.uss" />
+    <ui:VisualElement name="hud" picking-mode="Ignore" class="screen screen--hud">
+
+        <!-- Top-left: radar + squad -->
+        <ui:VisualElement picking-mode="Ignore">
+            <ui:VisualElement name="radar" picking-mode="Ignore" class="radar">
+                <ui:VisualElement picking-mode="Ignore" class="radar__ring" />
+                <ui:VisualElement name="radar-blips" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;" />
+                <ui:VisualElement picking-mode="Ignore" class="radar__self" />
+            </ui:VisualElement>
+            <ui:VisualElement name="squad-list" picking-mode="Ignore" class="squad-list" />
+        </ui:VisualElement>
+
+        <!-- Top-center: scores, timer, objectives -->
+        <ui:VisualElement picking-mode="Ignore" class="match-bar">
+            <ui:VisualElement class="match-bar__scores">
+                <ui:Label name="score-blue" text="42" class="match-bar__score match-bar__score--blue" />
+                <ui:Label name="match-timer" text="07:32" class="match-bar__timer" />
+                <ui:Label name="score-red" text="37" class="match-bar__score match-bar__score--red" />
+            </ui:VisualElement>
+            <ui:VisualElement name="objectives" class="match-bar__objectives" />
+        </ui:VisualElement>
+
+        <!-- Match events -->
+        <ui:VisualElement picking-mode="Ignore" class="hud__toast-area">
+            <ui:VisualElement name="toast" class="toast toast--hidden">
+                <ui:Label name="toast-text" text="Relay B captured" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Top-right: connection + kill feed -->
+        <ui:VisualElement picking-mode="Ignore" class="hud__top-right">
+            <ui:VisualElement class="net-stats">
+                <ui:Label name="fps" text="144 FPS" class="text-micro" />
+                <ui:Label name="ping" text="32 ms" class="ping ping--good" />
+            </ui:VisualElement>
+            <ui:VisualElement name="killfeed" class="killfeed" />
+        </ui:VisualElement>
+
+        <!-- Crosshair -->
+        <ui:VisualElement name="crosshair" picking-mode="Ignore" class="crosshair">
+            <ui:VisualElement class="crosshair__tick crosshair__tick--l" />
+            <ui:VisualElement class="crosshair__tick crosshair__tick--r" />
+            <ui:VisualElement class="crosshair__tick crosshair__tick--t" />
+            <ui:VisualElement class="crosshair__tick crosshair__tick--b" />
+            <ui:VisualElement class="crosshair__dot" />
+        </ui:VisualElement>
+
+        <!-- Bottom -->
+        <ui:VisualElement picking-mode="Ignore" class="hud__bottom">
+            <ui:VisualElement picking-mode="Ignore">
+                <ui:VisualElement name="chat" class="chat chat--idle">
+                    <ui:VisualElement name="chat-log" picking-mode="Ignore" class="chat__log" />
+                    <ui:TextField name="chat-input" class="chat__input" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="ship-status">
+                <ui:VisualElement class="ship-status__row">
+                    <ui:Label text="SHIELD" class="ship-status__label" />
+                    <ui:VisualElement name="bar-shield" class="bar bar--shield">
+                        <ui:VisualElement class="bar__trail" />
+                        <ui:VisualElement class="bar__fill" />
+                    </ui:VisualElement>
+                    <ui:Label name="shield-value" text="180" class="ship-status__value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ship-status__row">
+                    <ui:Label text="HULL" class="ship-status__label" />
+                    <ui:VisualElement name="bar-hull" class="bar bar--hull">
+                        <ui:VisualElement class="bar__trail" />
+                        <ui:VisualElement class="bar__fill" />
+                    </ui:VisualElement>
+                    <ui:Label name="hull-value" text="250" class="ship-status__value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ship-status__row">
+                    <ui:Label text="BOOST" class="ship-status__label" />
+                    <ui:VisualElement name="bar-energy" class="bar bar--energy">
+                        <ui:VisualElement class="bar__fill" />
+                    </ui:VisualElement>
+                    <ui:Label name="energy-value" text="72%" class="ship-status__value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="ship-status__speed">
+                    <ui:Label name="speed" text="214" class="readout" />
+                    <ui:Label text=" M/S" class="text-micro" style="margin-bottom: 8px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="weapon">
+                <ui:Label name="weapon-name" text="ARC RIFLE MK II" class="text-label" />
+                <ui:VisualElement name="ammo" class="weapon__ammo">
+                    <ui:Label name="ammo-mag" text="32" class="readout" />
+                    <ui:Label name="ammo-reserve" text="/ 180" class="weapon__reserve" />
+                </ui:VisualElement>
+                <ui:VisualElement name="abilities" class="abilities" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

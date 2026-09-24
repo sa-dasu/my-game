@@ -12,6 +12,10 @@ A Unity game project.
 
 - `Assets/` — game scenes, scripts, and art (created by Unity)
 - `ProjectSettings/` — Unity project configuration (created by Unity)
+- `Assets/UI/` — UI Toolkit screens (UXML) and styles (USS)
+- `Assets/Scripts/UI/` — UI controllers
+- `Docs/UI_DESIGN.md` — UI design guide (Korean)
+- `Docs/ui-preview.html` — open in a browser to preview every screen
 
 ## Contributing
 
